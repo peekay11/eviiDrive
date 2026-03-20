@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Eviidrive — Smart Ride Fares</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:   #08090a;
+      --surface: #0f1012;
+      --card:    #161819;
+      --border:  #232527;
+      --muted:   #3a3c40;
+      --text:    #e8e9ea;
+      --sub:     #8a8d92;
+      --lime:    #c6f135;
+      --lime-dim:#9abf1f;
+      --lime-glow: rgba(198,241,53,0.18);
+      --red:     #ff4545;
+      --white:   #ffffff;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 400;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: .6;
+    }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2.5rem;
+      padding-left: max(2.5rem, env(safe-area-inset-left));
+      padding-right: max(2.5rem, env(safe-area-inset-right));
+      height: 68px;
+      background: rgba(8,9,10,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .nav-logo-mark {
+      width: 34px; height: 34px;
+      background: var(--lime);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .nav-logo-mark svg { width: 20px; height: 20px; }
+    .nav-logo-text {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: var(--white);
+      letter-spacing: -0.03em;
+    }
+    .nav-logo-text span { color: var(--lime); }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--sub);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-cta {
+      background: var(--lime);
+      color: var(--black) !important;
+      padding: 0.5rem 1.2rem;
+      border-radius: 6px;
+      font-weight: 700 !important;
+      font-size: 0.875rem !important;
+      transition: background .2s !important;
+    }
+    .nav-cta:hover { background: var(--lime-dim) !important; color: var(--black) !important; }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 68px 2.5rem 0;
+      overflow: hidden;
+    }
+
+    .hero-bg-glow {
+      position: absolute;
+      top: -10%; left: -5%;
+      width: 60vw; height: 60vw;
+      background: radial-gradient(circle, rgba(198,241,53,0.07) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .hero-bg-glow-2 {
+      position: absolute;
+      bottom: -20%; right: -10%;
+      width: 50vw; height: 50vw;
+      background: radial-gradient(circle, rgba(198,241,53,0.04) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 30%, transparent 100%);
+      pointer-events: none;
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(198,241,53,0.1);
+      border: 1px solid rgba(198,241,53,0.25);
+      border-radius: 100px;
+      padding: 0.3rem 0.8rem;
+      font-size: 0.72rem;
+      color: var(--lime);
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 0.9rem;
+      animation: fadeUp .6s ease both;
+    }
+    .hero-tag::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: var(--lime);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: .5; transform: scale(1.4); }
+    }
+
+    .hero-headline {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2rem, 3.5vw, 3rem);
+      line-height: 1.06;
+      letter-spacing: -0.04em;
+      color: var(--white);
+      margin-bottom: 0.75rem;
+      animation: fadeUp .6s ease .1s both;
+    }
+    .hero-headline .accent { color: var(--lime); }
+
+    .hero-sub {
+      color: var(--sub);
+      font-size: 0.92rem;
+      line-height: 1.6;
+      max-width: 420px;
+      margin-bottom: 1.5rem;
+      animation: fadeUp .6s ease .2s both;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 2.5rem;
+      animation: fadeUp .6s ease .3s both;
+    }
+    .stat-value {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.4rem;
+      color: var(--white);
+    }
+    .stat-label {
+      font-size: 0.72rem;
+      color: var(--sub);
+      margin-top: 1px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── CALCULATOR CARD ── */
+    .calc-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 1.4rem 1.5rem;
+      position: relative;
+      overflow: hidden;
+      animation: fadeUp .6s ease .15s both;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+    }
+    .calc-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--lime), transparent);
+    }
+
+    .calc-card-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--white);
+      margin-bottom: 0.15rem;
+    }
+    .calc-card-sub {
+      font-size: 0.76rem;
+      color: var(--sub);
+      margin-bottom: 1rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+      margin-bottom: 0.6rem;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      margin-bottom: 0.6rem;
+    }
+    .form-group.half { margin-bottom: 0; }
+
+    .form-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--sub);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    .form-control {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      padding: 0.45rem 0.75rem;
+      width: 100%;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      -webkit-appearance: none;
+    }
+    .form-control:focus {
+      border-color: var(--lime);
+      box-shadow: 0 0 0 3px var(--lime-glow);
+    }
+    .form-control option { background: var(--card); }
+
+    .coord-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.65rem 0.75rem;
+      margin-bottom: 0.6rem;
+    }
+    .coord-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .coord-label.from { color: var(--lime); }
+    .coord-label.to   { color: #60c0ff; }
+    .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .dot.lime { background: var(--lime); }
+    .dot.blue { background: #60c0ff; }
+
+    .btn-submit {
+      width: 100%;
+      padding: 0.65rem;
+      background: var(--lime);
+      color: var(--black);
+      border: none;
+      border-radius: 10px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      transition: background .2s, transform .1s;
+      position: relative;
+      overflow: hidden;
+      margin-top: 0.4rem;
+    }
+    .btn-submit:hover  { background: var(--lime-dim); }
+    .btn-submit:active { transform: scale(0.98); }
+    .btn-submit.loading { pointer-events: none; color: transparent; }
+    .btn-submit.loading::after {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 18px; height: 18px;
+      margin: -9px 0 0 -9px;
+      border: 2px solid rgba(0,0,0,0.4);
+      border-top-color: var(--black);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── FARE RESULT ── */
+    .fare-result {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.65rem 1rem;
+      margin-top: 0.5rem;
+      min-height: 48px;
+      transition: border-color .3s;
+    }
+    .fare-result.active { border-color: var(--lime); }
+    .fare-result.error  { border-color: var(--red); }
+
+    .fare-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--sub);
+    }
+    .fare-amount {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.3rem;
+      color: var(--text);
+      transition: color .3s;
+    }
+    .fare-result.active .fare-amount { color: var(--lime); }
+    .fare-result.error  .fare-amount { color: var(--red); font-size: 0.88rem; font-family: 'DM Sans', sans-serif; font-weight: 400; }
+
+    /* ── JSON OUTPUT ── */
+    .json-section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 3rem 2.5rem 6rem;
+      position: relative;
+      z-index: 1;
+    }
+    .json-section-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--sub);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .json-section-title::before {
+      content: '{ }';
+      font-size: 0.75rem;
+      color: var(--lime);
+      font-weight: 700;
+    }
+    .json-output {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.82rem;
+      color: var(--sub);
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      z-index: 1;
+    }
+    .footer-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      color: var(--white);
+      letter-spacing: -0.03em;
+    }
+    .footer-logo span { color: var(--lime); }
+    .footer-copy { font-size: 0.78rem; color: var(--muted); }
+
+    /* ── RESPONSIVE ── */
+
+    /* Tablet */
+    @media (max-width: 900px) {
+      .hero-inner { grid-template-columns: 1fr; gap: 1.75rem; }
+      .hero { height: auto; min-height: 100svh; padding: 78px 1.5rem 2rem; }
+      .nav-links { display: none; }
+      .hero-sub { max-width: 100%; }
+    }
+
+    /* Mobile ≥ 390px (iPhone 14 etc.) */
+    @media (max-width: 600px) {
+      nav { padding: 0 1rem; height: 58px; }
+      .nav-logo-text { font-size: 1.1rem; }
+      .nav-logo-mark { width: 30px; height: 30px; }
+
+      .hero { padding: 66px 1rem 1.5rem; }
+
+      .hero-tag { font-size: 0.68rem; padding: 0.28rem 0.7rem; margin-bottom: 0.7rem; }
+
+      .hero-headline { font-size: 1.9rem; margin-bottom: 0.6rem; }
+
+      .hero-sub { font-size: 0.85rem; margin-bottom: 1rem; line-height: 1.55; }
+
+      .hero-stats { gap: 1.5rem; margin-bottom: 0; }
+      .stat-value { font-size: 1.2rem; }
+      .stat-label { font-size: 0.65rem; }
+
+      .calc-card { padding: 1rem 1rem; border-radius: 14px; }
+      .calc-card-title { font-size: 0.9rem; }
+      .calc-card-sub { font-size: 0.72rem; margin-bottom: 0.75rem; }
+
+      .form-row { grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.5rem; }
+      .form-group { margin-bottom: 0.5rem; gap: 0.25rem; }
+      .form-label { font-size: 0.68rem; }
+      .form-control { font-size: 0.8rem; padding: 0.4rem 0.65rem; border-radius: 8px; }
+
+      .coord-section { padding: 0.55rem 0.65rem; margin-bottom: 0.5rem; border-radius: 8px; }
+      .coord-label { font-size: 0.62rem; margin-bottom: 0.4rem; }
+
+      .btn-submit { padding: 0.6rem; font-size: 0.85rem; border-radius: 8px; margin-top: 0.3rem; }
+
+      .fare-result { padding: 0.5rem 0.75rem; min-height: 42px; border-radius: 8px; margin-top: 0.4rem; }
+      .fare-label { font-size: 0.68rem; }
+      .fare-amount { font-size: 1.1rem; }
+
+      .json-section { padding: 1.5rem 1rem 3rem; }
+      .json-output { font-size: 0.75rem; padding: 1rem; max-height: 220px; }
+
+      footer { flex-direction: column; gap: 0.35rem; text-align: center; padding: 1.25rem 1rem; }
+      .footer-copy { font-size: 0.72rem; }
+    }
+
+    /* Small mobile — iPhone 6/SE (375px × 667px) */
+    @media (max-width: 390px) {
+      .hero-headline { font-size: 1.65rem; }
+      .hero-sub { font-size: 0.8rem; }
+      .hero-stats { gap: 1.1rem; }
+      .stat-value { font-size: 1.1rem; }
+
+      .calc-card { padding: 0.85rem 0.85rem; }
+      .form-row { gap: 0.4rem; }
+      .form-control { font-size: 0.78rem; padding: 0.38rem 0.55rem; }
+      .coord-section { padding: 0.5rem 0.55rem; }
+      .fare-amount { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav>
+    <a class="nav-logo" href="#">
+      <div class="nav-logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M13 3L4 14h8l-1 7 9-11h-8l1-7z" fill="#08090a" stroke="#08090a" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span class="nav-logo-text">Evii<span>drive</span></span>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="#">Features</a></li>
+      <li><a href="#">Cities</a></li>
+      <li><a href="#">Drivers</a></li>
+      <li><a href="#">API Docs</a></li>
+      <li><a href="#" class="nav-cta">Get Started</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO + CALCULATOR -->
+  <section class="hero">
+    <div class="hero-bg-glow"></div>
+    <div class="hero-bg-glow-2"></div>
+    <div class="hero-grid"></div>
+
+    <div class="hero-inner">
+      <!-- LEFT: Copy -->
+      <div class="hero-copy">
+        <div class="hero-tag">Live Fare Engine</div>
+        <h1 class="hero-headline">
+          Know your fare<br>before you <span class="accent">move.</span>
+        </h1>
+        <p class="hero-sub">
+          Instant, transparent pricing across every city we serve.
+          No surge surprises — just real-time fares calculated to the cent.
+        </p>
+        <div class="hero-stats">
+          <div>
+            <div class="stat-value">12+</div>
+            <div class="stat-label">Cities</div>
+          </div>
+          <div>
+            <div class="stat-value">6</div>
+            <div class="stat-label">Car Types</div>
+          </div>
+          <div>
+            <div class="stat-value">0ms</div>
+            <div class="stat-label">Hidden Fees</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Calculator -->
+      <div class="calc-card">
+        <div class="calc-card-title">Fare Calculator</div>
+        <div class="calc-card-sub">Enter your trip details to get an instant estimate</div>
+
+        <form id="fareForm" onsubmit="calculateFare(event)" autocomplete="off">
+
+          <div class="form-row">
+            <div class="form-group half">
+              <label class="form-label" for="city">City</label>
+              <input class="form-control" type="text" id="city" value="Johannesburg" placeholder="e.g. Johannesburg">
+            </div>
+            <div class="form-group half">
+              <label class="form-label" for="passengers">Passengers</label>
+              <input class="form-control" type="number" id="passengers" value="1" min="1" max="6">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="car_type">Vehicle Type</label>
+            <select class="form-control" id="car_type">
+              <option value="small">Small</option>
+              <option value="sedan" selected>Sedan</option>
+              <option value="suv">SUV</option>
+              <option value="luxury">Luxury</option>
+              <option value="van">Van</option>
+              <option value="pickup">Pickup</option>
+              <option value="ev">EV ⚡</option>
+            </select>
+          </div>
+
+          <!-- FROM -->
+          <div class="coord-section">
+            <div class="coord-label from"><span class="dot lime"></span>Pickup Location</div>
+            <div class="form-row" style="margin-bottom:0">
+              <div class="form-group half">
+                <label class="form-label" for="start_lon">Longitude</label>
+                <input class="form-control" type="text" id="start_lon" value="28.0473" placeholder="28.0473">
+              </div>
+              <div class="form-group half">
+                <label class="form-label" for="start_lat">Latitude</label>
+                <input class="form-control" type="text" id="start_lat" value="-26.2041" placeholder="-26.2041">
+              </div>
+            </div>
+          </div>
+
+          <!-- TO -->
+          <div class="coord-section">
+            <div class="coord-label to"><span class="dot blue"></span>Drop-off Location</div>
+            <div class="form-row" style="margin-bottom:0">
+              <div class="form-group half">
+                <label class="form-label" for="end_lon">Longitude</label>
+                <input class="form-control" type="text" id="end_lon" value="27.9770" placeholder="27.9770">
+              </div>
+              <div class="form-group half">
+                <label class="form-label" for="end_lat">Latitude</label>
+                <input class="form-control" type="text" id="end_lat" value="-26.1450" placeholder="-26.1450">
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-submit" type="submit" id="calcBtn">Calculate Fare →</button>
+        </form>
+
+        <!-- RESULT -->
+        <div class="fare-result" id="fareDisplay">
+          <span class="fare-label">Estimated Fare</span>
+          <span class="fare-amount" id="fareAmount">R —</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- JSON OUTPUT -->
+  <section class="json-section">
+    <div class="json-section-title">API Response</div>
+    <pre class="json-output" id="result">Submit the form above to see the full API response...</pre>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">Evii<span>drive</span></div>
+    <div class="footer-copy">© 2025 Eviidrive. All rights reserved.</div>
+    <div class="footer-copy">Powered by the Eviidrive Fare Engine</div>
+  </footer>
+
+  <script>
+    async function calculateFare(event) {
+      event.preventDefault();
+
+      const btn = document.getElementById('calcBtn');
+      const fareDisplay = document.getElementById('fareDisplay');
+      const fareAmount  = document.getElementById('fareAmount');
+      const resultPre   = document.getElementById('result');
+
+      btn.classList.add('loading');
+      btn.textContent = 'Calculating…';
+      fareDisplay.className = 'fare-result';
+      fareAmount.textContent = 'R —';
+
+      const city       = document.getElementById('city').value;
+      const carType    = document.getElementById('car_type').value;
+      const passengers = document.getElementById('passengers').value;
+      const startLon   = document.getElementById('start_lon').value;
+      const startLat   = document.getElementById('start_lat').value;
+      const endLon     = document.getElementById('end_lon').value;
+      const endLat     = document.getElementById('end_lat').value;
+
+      const url = `http://127.0.0.1:5000/price?city=${encodeURIComponent(city)}&car_type=${encodeURIComponent(carType)}&passengers=${passengers}&start_lon=${startLon}&start_lat=${startLat}&end_lon=${endLon}&end_lat=${endLat}`;
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        resultPre.textContent = JSON.stringify(data, null, 2);
+
+        if (data.final_fare) {
+          const fareRand = (data.final_fare / 100).toFixed(2);
+          fareAmount.textContent = `R ${fareRand}`;
+          fareDisplay.classList.add('active');
+        } else if (data.error) {
+          fareAmount.textContent = data.error;
+          fareDisplay.classList.add('error');
+        } else {
+          fareAmount.textContent = 'R —';
+        }
+      } catch (err) {
+        resultPre.textContent = 'Error: ' + err.message;
+        fareAmount.textContent = 'Connection failed';
+        fareDisplay.classList.add('error');
+      } finally {
+        btn.classList.remove('loading');
+        btn.textContent = 'Calculate Fare →';
+      }
+    }
+  </script>
+</body>
+</html>
