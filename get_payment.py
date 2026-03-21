@@ -1,74 +1,56 @@
-import hashlib
-import urllib.parse
-from flask import Flask, request, redirect
+import requests
+from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# Replace with your Ozow merchant details
-MERCHANT_ID = "your-merchant-id"
-APPLICATION_KEY = "your-app-key"
-SECRET_KEY = "your-secret-key"
-SITE_CODE = "your-site-code"
-OZOW_URL = "https://pay.ozow.com/"
+# Use your Paystack secret key here (not the public key)
+PAYSTACK_SECRET_KEY = "sk_test_xxx"  # replace with your secret key
 
-def generate_signature(params: dict, secret_key: str) -> str:
+BASE_URL = "https://api.paystack.co"
+
+def initialize_transaction(email: str, amount_kobo: int, callback_url: str):
     """
-    Generate Ozow signature using SHA512.
-    Concatenate params in alphabetical order + secret key.
+    Initialize a Paystack transaction.
+    amount_kobo = amount in kobo (10000 = ₦100)
     """
-    sorted_items = sorted(params.items())
-    concat_str = "".join(str(v) for _, v in sorted_items) + secret_key
-    return hashlib.sha512(concat_str.encode("utf-8")).hexdigest()
-
-@app.route("/pay")
-def pay():
-    amount = "100.00"  # Example amount
-    transaction_id = "TX12345"
-    return_url = "https://yourdomain.com/return"
-    cancel_url = "https://yourdomain.com/cancel"
-    notify_url = "https://yourdomain.com/notify"
-
-    params = {
-        "SiteCode": SITE_CODE,
-        "CountryCode": "ZA",
-        "CurrencyCode": "ZAR",
-        "Amount": amount,
-        "TransactionReference": transaction_id,
-        "BankReference": "EviiDrive Ride",
-        "Customer": "customer@example.com",
-        "CancelUrl": cancel_url,
-        "ErrorUrl": cancel_url,
-        "SuccessUrl": return_url,
-        "NotifyUrl": notify_url,
-        "IsTest": "true",  # set to "false" in production
+    url = f"{BASE_URL}/transaction/initialize"
+    headers = {
+        "Authorization": f"Bearer {PAYSTACK_SECRET_KEY}",
+        "Content-Type": "application/json"
     }
+    payload = {
+        "email": email,
+        "amount": amount_kobo,
+        "callback_url": callback_url
+    }
+    response = requests.post(url, json=payload, headers=headers)
+    return response.json()
 
-    signature = generate_signature(params, SECRET_KEY)
-    params["HashCheck"] = signature
+def verify_transaction(reference: str):
+    """
+    Verify transaction status using reference.
+    """
+    url = f"{BASE_URL}/transaction/verify/{reference}"
+    headers = {
+        "Authorization": f"Bearer {PAYSTACK_SECRET_KEY}"
+    }
+    response = requests.get(url, headers=headers)
+    return response.json()
 
-    # Redirect user to Ozow payment page
-    query_string = urllib.parse.urlencode(params)
-    return redirect(OZOW_URL + "?" + query_string)
+@app.route("/pay", methods=["POST"])
+def pay():
+    data = request.get_json()
+    email = data.get("email")
+    amount = int(data.get("amount", 10000))  # default ₦100
+    callback_url = "https://yourdomain.com/callback"
 
-@app.route("/notify", methods=["POST"])
-def notify():
-    # Ozow will POST payment result here
-    data = request.form.to_dict()
-    print("Ozow notification:", data)
+    init = initialize_transaction(email, amount, callback_url)
+    return jsonify(init)
 
-    # Verify signature again before trusting
-    signature = generate_signature({k: v for k, v in data.items() if k != "HashCheck"}, SECRET_KEY)
-    if signature != data.get("HashCheck"):
-        return "Invalid signature", 400
-
-    # Handle payment status
-    if data.get("Status") == "Complete":
-        # Release funds in eviiDrive wallet
-        print("Payment successful for:", data.get("TransactionReference"))
-    else:
-        print("Payment failed or cancelled")
-
-    return "OK", 200
+@app.route("/verify/<reference>", methods=["GET"])
+def verify(reference):
+    result = verify_transaction(reference)
+    return jsonify(result)
 
 if __name__ == "__main__":
     app.run(port=5000, debug=True)
