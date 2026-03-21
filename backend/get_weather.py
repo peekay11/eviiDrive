@@ -1,5 +1,7 @@
 import requests
-from secrets_ import api_key 
+from secrets_ import api_key
+
+
 
 # Configuration
 API_KEY = api_key

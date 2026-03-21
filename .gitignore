@@ -1,0 +1,24 @@
+# --- Python / Backend ---
+.venv/
+venv/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+backend/.env
+
+# --- Frontend / Node ---
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+.eslintcache
+npm-debug.log*
+
+# --- Docker & System ---
+.dockerignore
+.DS_Store
+Thumbs.db
+
+# --- Project Specific ---
+todo.md

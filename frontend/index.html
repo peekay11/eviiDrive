@@ -258,7 +258,6 @@
       width: 100%;
       outline: none;
       transition: border-color .2s, box-shadow .2s;
-      
     }
     .form-control:focus {
       border-color: var(--lime);
@@ -342,7 +341,6 @@
       font-weight: 400;
       line-height: 1.4;
     }
-    /* Minimum fare notice */
     .fare-minimum-notice {
       font-size: clamp(0.55rem, 0.65vh, 0.65rem);
       color: var(--sub);
@@ -523,7 +521,6 @@
     }
     .trip-cell-value.highlight { color: var(--lime); }
 
-    /* ── 3-column breakdown (was 2-col, now 3) ── */
     .trip-breakdown {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
@@ -537,7 +534,6 @@
       border-bottom: 1px solid var(--border);
     }
     .trip-breakdown-item:nth-child(3n) { border-right: none; }
-    /* last row — items 4,5,6 */
     .trip-breakdown-item:nth-last-child(-n+3) { border-bottom: none; }
     .breakdown-key {
       font-size: 0.6rem;
@@ -557,7 +553,6 @@
     .breakdown-val.red  { color: var(--red); }
     .breakdown-val.dim  { color: var(--sub); }
 
-    /* ── HERO TAG ROW ── */
     .hero-tag-row {
       display: flex;
       align-items: center;
@@ -715,7 +710,6 @@
       .calc-card { padding: 0; border-radius: 12px; }
       .fare-amount { font-size: clamp(1.3rem, 6vw, 1.8rem); }
       .trip-breakdown { grid-template-columns: 1fr 1fr; }
-      /* reset 3-col border rules for 2-col on mobile */
       .trip-breakdown-item { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
       .trip-breakdown-item:nth-child(3n)       { border-right: 1px solid var(--border); }
       .trip-breakdown-item:nth-last-child(-n+3) { border-bottom: 1px solid var(--border); }
@@ -740,7 +734,6 @@
 </head>
 <body>
 
-  <!-- NAVBAR -->
   <nav>
     <a class="nav-logo" href="#">
       <div class="nav-logo-mark">
@@ -765,7 +758,6 @@
     <div class="hero-grid"></div>
 
     <div class="hero-inner">
-      <!-- LEFT: Copy -->
       <div class="hero-copy">
         <div class="hero-tag-row">
           <div class="hero-tag">Live Fare Engine</div>
@@ -790,7 +782,7 @@
             <div class="stat-label">Cities</div>
           </div>
           <div>
-            <div class="stat-value">13</div><!-- ✅ updated from 6 -->
+            <div class="stat-value">13</div>
             <div class="stat-label">Car Types</div>
           </div>
           <div>
@@ -800,7 +792,6 @@
         </div>
       </div>
 
-      <!-- RIGHT: Calculator -->
       <div class="calc-card">
         <div class="card-header">
           <div class="calc-card-title">Fare Calculator</div>
@@ -809,9 +800,7 @@
 
         <div class="card-scroll">
           <form id="fareForm" onsubmit="calculateFare(event)" autocomplete="off">
-
             <div class="card-section-label">Trip Details</div>
-
             <div class="form-row">
               <div class="form-group half">
                 <label class="form-label" for="passengers">Passengers</label>
@@ -832,7 +821,6 @@
               </div>
             </div>
 
-            <!-- Pickup -->
             <div class="form-group">
               <label class="form-label">Pickup Location</label>
               <div class="addr-wrap">
@@ -851,7 +839,6 @@
               <input type="hidden" id="start_lat">
             </div>
 
-            <!-- Drop-off -->
             <div class="form-group">
               <label class="form-label">Drop-off Location</label>
               <div class="addr-wrap">
@@ -874,19 +861,15 @@
             <button class="btn-submit" type="submit" id="calcBtn">Calculate Fare →</button>
           </form>
 
-          <!-- RESULT -->
           <div class="fare-result" id="fareDisplay">
             <div class="fare-result-inner">
               <span class="fare-label">Estimated Fare</span>
               <span class="fare-amount" id="fareAmount">R —</span>
-              <!-- shown when fare was floored to minimum -->
               <span class="fare-minimum-notice" id="fareMinNotice">Minimum fare applied</span>
             </div>
           </div>
 
-          <!-- TRIP INFO PANEL -->
           <div class="trip-info" id="tripInfo">
-            <!-- Row 1: Distance / Time / Per km -->
             <div class="trip-info-grid">
               <div class="trip-info-cell">
                 <div class="trip-cell-label">Distance</div>
@@ -902,7 +885,6 @@
               </div>
             </div>
 
-            <!-- Row 2: 6-cell breakdown (3 cols) -->
             <div class="trip-breakdown">
               <div class="trip-breakdown-item">
                 <span class="breakdown-key">Base Fare</span>
@@ -930,19 +912,16 @@
               </div>
             </div>
           </div>
-
-        </div><!-- /.card-scroll -->
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- JSON OUTPUT -->
   <section class="json-section">
     <div class="json-section-title">API Response</div>
     <pre class="json-output" id="result">Submit the form above to see the full API response...</pre>
   </section>
 
-  <!-- FOOTER -->
   <footer>
     <div class="footer-logo">Evii<span>drive</span></div>
     <div class="footer-copy">© 2025 Eviidrive. All rights reserved.</div>
@@ -950,9 +929,7 @@
   </footer>
 
   <script>
-    // ─────────────────────────────────────────────
-    // FARE CALCULATION
-    // ─────────────────────────────────────────────
+    // ── FARE CALCULATION ──
     async function calculateFare(event) {
       event.preventDefault();
 
@@ -978,7 +955,8 @@
       const endLon     = document.getElementById('end_lon').value;
       const endLat     = document.getElementById('end_lat').value;
 
-      const url = `http://127.0.0.1:5000/price?city=${encodeURIComponent(city)}&car_type=${encodeURIComponent(carType)}&passengers=${passengers}&start_lon=${startLon}&start_lat=${startLat}&end_lon=${endLon}&end_lat=${endLat}`;
+      // UPDATED: Use /api prefix for Nginx routing
+      const url = `/api/price?city=${encodeURIComponent(city)}&car_type=${encodeURIComponent(carType)}&passengers=${passengers}&start_lon=${startLon}&start_lat=${startLat}&end_lon=${endLon}&end_lat=${endLat}`;
 
       try {
         const response = await fetch(url);
@@ -992,16 +970,13 @@
         }
 
         if (data.final_fare != null) {
-          // ✅ final_fare is already in ZAR — no /100 needed
           fareAmount.textContent = `R ${data.final_fare.toFixed(2)}`;
           fareDisplay.classList.add('active');
 
-          // Show minimum fare notice if fare was floored
           if (data.raw_fare != null && data.final_fare >= data.minimum_fare
               && data.raw_fare < data.minimum_fare) {
             fareMinNote.classList.add('visible');
           }
-
           populateTripInfo(data, carType, passengers);
         }
       } catch (err) {
@@ -1014,9 +989,6 @@
       }
     }
 
-    // ─────────────────────────────────────────────
-    // TRIP INFO PANEL
-    // ─────────────────────────────────────────────
     const VEHICLE_LABELS = {
       small:'Small', sedan:'Sedan', suv:'SUV', luxury:'Luxury',
       van:'Van', pickup:'Pickup', ev:'EV ⚡', motorbike:'Motorbike',
@@ -1025,135 +997,73 @@
     };
 
     function r(val) {
-      // Format a ZAR value — already in Rands, no conversion needed
       return val != null ? `R ${Number(val).toFixed(2)}` : '—';
     }
 
     function populateTripInfo(data, carType, passengers) {
       const panel = document.getElementById('tripInfo');
-
-      // ── Row 1 ──
-      // distance_km and duration_min now returned directly by /price endpoint
       const distKm = data.distance_km;
       const durMin = data.duration_min;
-      document.getElementById('infoDistance').textContent =
-        distKm != null ? `${distKm.toFixed(1)} km` : '—';
-      document.getElementById('infoDuration').textContent =
-        durMin != null ? `${Math.round(durMin)} min` : '—';
+      
+      document.getElementById('infoDistance').textContent = distKm != null ? `${distKm.toFixed(1)} km` : '—';
+      document.getElementById('infoDuration').textContent = durMin != null ? `${Math.round(durMin)} min` : '—';
 
-      // Effective per-km = final fare ÷ actual distance
       if (data.final_fare != null && distKm) {
-        document.getElementById('infoPerKm').textContent =
-          `R ${(data.final_fare / distKm).toFixed(2)}`;
+        document.getElementById('infoPerKm').textContent = `R ${(data.final_fare / distKm).toFixed(2)}`;
       } else {
         document.getElementById('infoPerKm').textContent = '—';
       }
 
-      // ── Row 2: 6-cell breakdown ──
-
-      // Base fare — already in ZAR
       document.getElementById('infoBase').textContent = r(data.base_fare);
-
-      // Km charge — already in ZAR
       document.getElementById('infoKmCharge').textContent = r(data.km_charge);
-
-      // Minute charge — already in ZAR
       document.getElementById('infoMinCharge').textContent = r(data.minute_charge);
 
-      // Weather multiplier (was "surge_multiplier" in old code)
       const weatherMult = data.weather_multiplier ?? 1;
       const weatherEl   = document.getElementById('infoWeather');
       weatherEl.textContent = `${weatherMult}×`;
       weatherEl.className   = 'breakdown-val ' + (weatherMult > 1 ? 'red' : 'lime');
 
-      // Vehicle label
-      document.getElementById('infoVehicle').textContent =
-        VEHICLE_LABELS[carType] ?? carType;
-
-      // Passengers
+      document.getElementById('infoVehicle').textContent = VEHICLE_LABELS[carType] ?? carType;
       document.getElementById('infoPassengers').textContent = `${passengers} pax`;
 
       panel.classList.add('visible');
     }
 
-    // ─────────────────────────────────────────────
-    // CITY WEATHER WIDGET
-    // ─────────────────────────────────────────────
-    const WMO_ICONS = {
-      0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',
-      51:'🌦️',53:'🌦️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',
-      71:'🌨️',73:'🌨️',75:'❄️',80:'🌦️',81:'🌧️',82:'⛈️',
-      95:'⛈️',96:'⛈️',99:'⛈️',
-    };
-
-    const CITY_COORDS = {
-      'johannesburg':[-26.2041,28.0473],'joburg':[-26.2041,28.0473],
-      'jozi':[-26.2041,28.0473],'cape town':[-33.9249,18.4241],
-      'durban':[-29.8587,31.0218],'pretoria':[-25.7479,28.2293],
-      'port elizabeth':[-33.9608,25.6022],'gqeberha':[-33.9608,25.6022],
-      'bloemfontein':[-29.0852,26.1596],'east london':[-32.9814,27.8611],
-      'polokwane':[-23.9045,29.4689],'nelspruit':[-25.4745,30.9700],
-      'kimberley':[-28.7282,24.7499],'nairobi':[-1.2921,36.8219],
-      'lagos':[6.5244,3.3792],'accra':[5.6037,-0.1870],
-      'london':[51.5074,-0.1278],'new york':[40.7128,-74.0060],
-    };
+    // ── WEATHER WIDGET ──
+    const WMO_ICONS = { 0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',71:'🌨️',73:'🌨️',75:'❄️',80:'🌦️',81:'🌧️',82:'⛈️',95:'⛈️',96:'⛈️',99:'⛈️' };
+    const CITY_COORDS = { 'johannesburg':[-26.2041,28.0473],'cape town':[-33.9249,18.4241],'durban':[-29.8587,31.0218],'pretoria':[-25.7479,28.2293] };
 
     function updateClock() {
       const now = new Date();
       const el  = document.getElementById('widgetTime');
-      if (el) el.textContent =
-        [now.getHours(), now.getMinutes(), now.getSeconds()]
-          .map(n => String(n).padStart(2,'0')).join(':');
+      if (el) el.textContent = [now.getHours(), now.getMinutes(), now.getSeconds()].map(n => String(n).padStart(2,'0')).join(':');
     }
 
     async function fetchWeather(lat, lon, cityName) {
       try {
         const res  = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode&temperature_unit=celsius&timezone=auto`);
         const data = await res.json();
-        const code = data.current.weathercode;
-        const temp = Math.round(data.current.temperature_2m);
-        document.getElementById('weatherIcon').textContent = WMO_ICONS[code] ?? '🌡️';
+        document.getElementById('weatherIcon').textContent = WMO_ICONS[data.current.weathercode] ?? '🌡️';
         document.getElementById('widgetCity').textContent  = cityName;
-        document.getElementById('widgetTemp').textContent  = `${temp}°C`;
+        document.getElementById('widgetTemp').textContent  = `${Math.round(data.current.temperature_2m)}°C`;
       } catch {
-        document.getElementById('weatherIcon').textContent = '📍';
-        document.getElementById('widgetCity').textContent  = cityName;
-        document.getElementById('widgetTemp').textContent  = '';
+        document.getElementById('widgetCity').textContent = cityName;
       }
     }
 
     async function loadWidgetForCity(cityName) {
       const coords = CITY_COORDS[cityName.trim().toLowerCase()];
-      if (coords) {
-        document.getElementById('widgetCity').textContent  = cityName;
-        document.getElementById('weatherIcon').textContent = '⏳';
-        document.getElementById('widgetTemp').textContent  = '';
-        await fetchWeather(coords[0], coords[1], cityName);
-      } else {
-        document.getElementById('weatherIcon').textContent = '📍';
-        document.getElementById('widgetCity').textContent  = cityName || '—';
-        document.getElementById('widgetTemp').textContent  = '';
-      }
+      if (coords) await fetchWeather(coords[0], coords[1], cityName);
     }
 
-    // ─────────────────────────────────────────────
-    // VEHICLE FETCH
-    // ─────────────────────────────────────────────
-    const FALLBACK_VEHICLES = [
-      {value:'small',label:'Small'},{value:'sedan',label:'Sedan'},
-      {value:'suv',label:'SUV'},{value:'luxury',label:'Luxury'},
-      {value:'van',label:'Van'},{value:'pickup',label:'Pickup'},
-      {value:'ev',label:'EV ⚡'},{value:'motorbike',label:'Motorbike'},
-      {value:'minibus',label:'Minibus'},{value:'convertible',label:'Convertible'},
-      {value:'limousine',label:'Limousine'},{value:'truck',label:'Truck'},
-      {value:'shuttle',label:'Shuttle'},
-    ];
+    // ── VEHICLE FETCH ──
+    const FALLBACK_VEHICLES = [{value:'small',label:'Small'},{value:'sedan',label:'Sedan'},{value:'suv',label:'SUV'}];
 
     async function fetchVehicles() {
       const sel = document.getElementById('car_type');
       try {
-        const res = await fetch('http://127.0.0.1:5000/vehicles');
-        if (!res.ok) throw new Error('non-200');
+        // UPDATED: Use /api prefix
+        const res = await fetch('/api/vehicles');
         const data = await res.json();
         populateVehicleSelect(sel, data);
       } catch {
@@ -1166,7 +1076,6 @@
       vehicles.forEach((v, i) => {
         const opt = document.createElement('option');
         opt.value = v.value;
-        // Show icon from server response if available
         opt.textContent = v.icon ? `${v.icon} ${v.label}` : v.label;
         if (i === 0) opt.selected = true;
         sel.appendChild(opt);
@@ -1174,39 +1083,19 @@
       sel.disabled = false;
     }
 
-    // ─────────────────────────────────────────────
-    // ADDRESS AUTOCOMPLETE
-    // ─────────────────────────────────────────────
+    // ── ADDRESS AUTOCOMPLETE ──
     function setupAutocomplete(prefix) {
-      const input    = document.getElementById(`${prefix}_addr`);
-      const dropdown = document.getElementById(`${prefix}_dropdown`);
+      const input = document.getElementById(`${prefix}_addr`);
       const clearBtn = document.getElementById(`${prefix}_clear`);
       let debounceTimer;
-      let activeIndex = -1;
 
       input.addEventListener('input', () => {
         const q = input.value.trim();
         clearBtn.classList.toggle('visible', q.length > 0);
-        if (q.length < 3) { closeDropdown(prefix); return; }
+        if (q.length < 3) return;
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => fetchSuggestions(prefix, q), 350);
       });
-
-      input.addEventListener('keydown', (e) => {
-        const opts = dropdown.querySelectorAll('.addr-option');
-        if (e.key === 'ArrowDown')  { e.preventDefault(); activeIndex = Math.min(activeIndex+1, opts.length-1); highlight(opts, activeIndex); }
-        else if (e.key === 'ArrowUp') { e.preventDefault(); activeIndex = Math.max(activeIndex-1, 0); highlight(opts, activeIndex); }
-        else if (e.key === 'Enter' && activeIndex >= 0) { e.preventDefault(); opts[activeIndex]?.click(); }
-        else if (e.key === 'Escape') { closeDropdown(prefix); }
-      });
-
-      document.addEventListener('click', (e) => {
-        if (!input.closest('.addr-wrap').contains(e.target)) closeDropdown(prefix);
-      });
-    }
-
-    function highlight(opts, idx) {
-      opts.forEach((o, i) => o.style.background = i === idx ? 'rgba(255,255,255,0.06)' : '');
     }
 
     async function fetchSuggestions(prefix, query) {
@@ -1214,30 +1103,19 @@
       dropdown.innerHTML = '<div class="addr-loading">Searching…</div>';
       dropdown.classList.add('open');
       try {
-        const res  = await fetch(`http://127.0.0.1:5000/suggest?q=${encodeURIComponent(query)}`);
+        // UPDATED: Use /api prefix
+        const res  = await fetch(`/api/suggest?q=${encodeURIComponent(query)}`);
         const data = await res.json();
-        if (!Array.isArray(data) || data.length === 0) {
-          dropdown.innerHTML = '<div class="addr-loading">No results found</div>';
-          return;
-        }
         dropdown.innerHTML = '';
         data.slice(0, 5).forEach(item => {
-          const addr = item.address || {};
-          const main = addr.road || addr.suburb || addr.city || item.display_name.split(',')[0];
-          const opt  = document.createElement('div');
+          const opt = document.createElement('div');
           opt.className = 'addr-option';
-          opt.innerHTML = `
-            <span class="addr-option-icon">📍</span>
-            <div class="addr-option-body">
-              <div class="addr-option-main">${main}</div>
-              <div class="addr-option-sub">${item.display_name}</div>
-            </div>`;
-          opt.addEventListener('click', () =>
-            selectAddress(prefix, item.display_name, parseFloat(item.lat), parseFloat(item.lon)));
+          opt.innerHTML = `<div class="addr-option-body"><div class="addr-option-main">${item.display_name.split(',')[0]}</div><div class="addr-option-sub">${item.display_name}</div></div>`;
+          opt.addEventListener('click', () => selectAddress(prefix, item.display_name, parseFloat(item.lat), parseFloat(item.lon)));
           dropdown.appendChild(opt);
         });
       } catch {
-        dropdown.innerHTML = '<div class="addr-loading">Location search unavailable</div>';
+        dropdown.innerHTML = '<div class="addr-loading">Unavailable</div>';
       }
     }
 
@@ -1245,37 +1123,23 @@
       document.getElementById(`${prefix}_lat`).value = lat;
       document.getElementById(`${prefix}_lon`).value = lon;
       document.getElementById(`${prefix}_addr`).value = label;
-      document.getElementById(`${prefix}_clear`).classList.add('visible');
+      document.getElementById(`${prefix}_coords_display`).style.display = 'flex';
       document.getElementById(`${prefix}_lat_badge`).textContent = lat.toFixed(5);
       document.getElementById(`${prefix}_lon_badge`).textContent = lon.toFixed(5);
-      document.getElementById(`${prefix}_coords_display`).style.display = 'flex';
-      closeDropdown(prefix);
+      document.getElementById(`${prefix}_dropdown`).classList.remove('open');
     }
 
     function clearAddr(prefix) {
       document.getElementById(`${prefix}_addr`).value = '';
-      document.getElementById(`${prefix}_lat`).value  = '';
-      document.getElementById(`${prefix}_lon`).value  = '';
-      document.getElementById(`${prefix}_clear`).classList.remove('visible');
       document.getElementById(`${prefix}_coords_display`).style.display = 'none';
-      closeDropdown(prefix);
+      document.getElementById(`${prefix}_dropdown`).classList.remove('open');
     }
 
-    function closeDropdown(prefix) {
-      const dd = document.getElementById(`${prefix}_dropdown`);
-      dd.classList.remove('open');
-      dd.innerHTML = '';
-    }
-
-    // ─────────────────────────────────────────────
-    // INIT
-    // ─────────────────────────────────────────────
+    // ── INIT ──
     window.addEventListener('DOMContentLoaded', () => {
-      updateClock();
-      setInterval(updateClock, 1000);
+      updateClock(); setInterval(updateClock, 1000);
       loadWidgetForCity(document.getElementById('city').value);
-      setupAutocomplete('start');
-      setupAutocomplete('end');
+      setupAutocomplete('start'); setupAutocomplete('end');
       fetchVehicles();
     });
   </script>
