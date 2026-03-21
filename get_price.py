@@ -1,6 +1,7 @@
+# get_price.py
+import datetime
 from get_weather import get_weather
 from get_distance import get_osrm_distance
-import datetime
 
 #===========================================================
 # Dictionaries for multipliers
@@ -35,84 +36,96 @@ per_km_rate = {"default": 10.33, "premium": 12.0, "economy": 8.0}
 #===========================================================
 # Main fare calculation function
 #===========================================================
+
 def get_price_info(distance_km, duration_min, weather_cond,
                    car_type="small", passengers=1, ride_time=None):
-    # Guard against None values
-    if distance_km is None or duration_min is None:
-        return {"error": "Distance or duration could not be calculated. Check coordinates or OSRM server."}
+    try:
+        # Validate inputs
+        if distance_km is None or duration_min is None:
+            return {"error": "Distance or duration missing."}
+        if not isinstance(distance_km, (int, float)) or not isinstance(duration_min, (int, float)):
+            return {"error": "Distance and duration must be numbers."}
+        if passengers < 1:
+            return {"error": "Passengers must be >= 1."}
 
-    cond = (weather_cond or "").lower()
+        # Car type validation
+        if car_type.lower() not in car_multiplier_map:
+            return {"error": f"Invalid car type '{car_type}'. Allowed types: {', '.join(car_multiplier_map.keys())}"}
 
-    # Weather multiplier
-    weather_multiplier = 1.0
-    for key, mult in weather_multiplier_map.items():
-        if key in cond:
-            weather_multiplier = mult
-            break
+        cond = (weather_cond or "clear").lower()
 
-    # Distance multiplier
-    if distance_km > 100:
-        distance_multiplier = distance_multiplier_map["long"]
-    elif distance_km > 50:
-        distance_multiplier = distance_multiplier_map["medium"]
-    elif distance_km > 10:
-        distance_multiplier = distance_multiplier_map["short"]
-    else:
-        distance_multiplier = distance_multiplier_map["very_short"]
+        # Weather multiplier
+        weather_multiplier = 1.0
+        for key, mult in weather_multiplier_map.items():
+            if key in cond:
+                weather_multiplier = mult
+                break
 
-    # Duration multiplier
-    if duration_min > 180:
-        duration_multiplier = duration_multiplier_map["very_long"]
-    elif duration_min > 120:
-        duration_multiplier = duration_multiplier_map["long"]
-    elif duration_min > 60:
-        duration_multiplier = duration_multiplier_map["medium"]
-    elif duration_min > 30:
-        duration_multiplier = duration_multiplier_map["short"]
-    else:
-        duration_multiplier = duration_multiplier_map["very_short"]
+        # Distance multiplier
+        if distance_km > 100:
+            distance_multiplier = distance_multiplier_map["long"]
+        elif distance_km > 50:
+            distance_multiplier = distance_multiplier_map["medium"]
+        elif distance_km > 10:
+            distance_multiplier = distance_multiplier_map["short"]
+        else:
+            distance_multiplier = distance_multiplier_map["very_short"]
 
-    # Car multiplier
-    car_mult = car_multiplier_map.get(car_type.lower(), 1.0)
+        # Duration multiplier
+        if duration_min > 180:
+            duration_multiplier = duration_multiplier_map["very_long"]
+        elif duration_min > 120:
+            duration_multiplier = duration_multiplier_map["long"]
+        elif duration_min > 60:
+            duration_multiplier = duration_multiplier_map["medium"]
+        elif duration_min > 30:
+            duration_multiplier = duration_multiplier_map["short"]
+        else:
+            duration_multiplier = duration_multiplier_map["very_short"]
 
-    # Passenger multiplier
-    passenger_mult = passenger_multiplier_map.get(passengers, 1.5)
+        # Car multiplier
+        car_mult = car_multiplier_map[car_type.lower()]
 
-    # Time multiplier
-    if ride_time is None:
-        ride_time = datetime.datetime.now()
-    hour = ride_time.hour
-    if 5 <= hour < 11:
-        time_mult = time_multiplier_map["morning"]
-    elif 11 <= hour < 17:
-        time_mult = time_multiplier_map["day"]
-    elif 17 <= hour < 22:
-        time_mult = time_multiplier_map["evening"]
-    else:
-        time_mult = time_multiplier_map["night"]
+        # Passenger multiplier
+        passenger_mult = passenger_multiplier_map.get(passengers, 1.5)
 
-    # Per‑km scaling
-    rate = per_km_rate["default"]
-    scaled_distance = distance_km * rate
+        # Time multiplier
+        if ride_time is None:
+            ride_time = datetime.datetime.now()
+        hour = ride_time.hour
+        if 5 <= hour < 11:
+            time_mult = time_multiplier_map["morning"]
+        elif 11 <= hour < 17:
+            time_mult = time_multiplier_map["day"]
+        elif 17 <= hour < 22:
+            time_mult = time_multiplier_map["evening"]
+        else:
+            time_mult = time_multiplier_map["night"]
 
-    # Final fare
-    base_fare = 10000  # ₦100 in kobo
-    final_fare = (base_fare * weather_multiplier * distance_multiplier *
-                  duration_multiplier * car_mult * passenger_mult * time_mult)
+        # Per‑km scaling
+        rate = per_km_rate["default"]
+        scaled_distance = distance_km * rate
 
-    return {
-        "scaled_distance": scaled_distance,
-        "weather_multiplier": weather_multiplier,
-        "distance_multiplier": distance_multiplier,
-        "duration_multiplier": duration_multiplier,
-        "car_multiplier": car_mult,
-        "passenger_multiplier": passenger_mult,
-        "time_multiplier": time_mult,
-        "final_fare": final_fare
-    }
+        # Final fare
+        base_fare = 10000  # ₦100 in kobo
+        final_fare = (base_fare * weather_multiplier * distance_multiplier *
+                      duration_multiplier * car_mult * passenger_mult * time_mult)
+
+        return {
+            "scaled_distance": scaled_distance,
+            "weather_multiplier": weather_multiplier,
+            "distance_multiplier": distance_multiplier,
+            "duration_multiplier": duration_multiplier,
+            "car_multiplier": car_mult,
+            "passenger_multiplier": passenger_mult,
+            "time_multiplier": time_mult,
+            "final_fare": final_fare
+        }
+    except Exception as e:
+        return {"error": f"Unexpected error: {str(e)}"}
 
 #===========================================================
-# Usage
+# Usage Example
 #===========================================================
 if __name__ == "__main__":
     city, country, temp_c, condition = get_weather("Johannesburg")

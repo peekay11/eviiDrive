@@ -1,24 +1,37 @@
-# eviiDrive 🚗💨
+# User's Edge Browser Tabs Metadata
 
-A ride pricing calculator for drivers.  
-eviiDrive helps drivers estimate fares based on **distance, car type, passenger load, weather, and time of day**.  
-It integrates with **WeatherAPI** and **OSRM** (Open Source Routing Machine) to fetch real‑time conditions and route distances.
+The `edge_all_open_tabs` object provides important context about the user's browsing session in Microsoft Edge.  
+- The tab with `isCurrent=true` is the user's **currently active/viewing tab**.  
+- Tabs with `isCurrent=false` are other open tabs in the background.
 
----
+## Structure
 
-## ✨ Features
-- **Distance scaling**: Converts kilometers into scaled units (e.g., 21 km → 217).
-- **Car type multipliers**: Different rates for small cars, sedans, SUVs, vans, pickups, EVs, and luxury vehicles.
-- **Passenger load multipliers**: Adjusts fares based on the number of passengers.
-- **Weather multipliers**: Rain, storms, fog, snow, etc. affect pricing.
-- **Time of day multipliers**: Morning, day, evening, and night rates.
-- **Duration multipliers**: Longer trips cost more depending on travel time.
-- **Modular design**: Easy to extend with new rules or APIs.
+Each tab entry contains:
+- **pageTitle**: The title of the web page.
+- **pageUrl**: The URL of the web page.
+- **tabId**: A unique identifier for the tab.
+- **isCurrent**: Boolean flag indicating if this tab is the active tab.
 
----
+## Example
 
-## 🛠️ Installation
-Clone the repository:
-```bash
-git clone https://github.com/peekay11/eviiDrive.git
-cd eviiDrive
+```json
+edge_all_open_tabs = [
+  {
+    "pageTitle": "Ride Distance Calculator",
+    "pageUrl": "http://127.0.0.1/index.html",
+    "tabId": 616861364,
+    "isCurrent": true
+  },
+  {
+    "pageTitle": "peekay11/eviiDrive: for drivers to price their rides",
+    "pageUrl": "https://github.com/peekay11/eviiDrive",
+    "tabId": 616861285,
+    "isCurrent": false
+  },
+  {
+    "pageTitle": "OSRM API Documentation",
+    "pageUrl": "https://project-osrm.org/docs/v5.24.0/api",
+    "tabId": 616861353,
+    "isCurrent": false
+  }
+]
