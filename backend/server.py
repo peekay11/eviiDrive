@@ -6,7 +6,7 @@ from get_price import get_price_info, minimum_fare_map, per_km_rate, per_min_rat
 from typing import Any
 import requests
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='../frontend', static_url_path='/')
 CORS(app)
 
 # ===========================================================
@@ -39,11 +39,11 @@ def _parse_passengers(args: Any) -> tuple[int, None] | tuple[None, tuple[dict, i
 # Routes
 # ===========================================================
 @app.route("/")
-def home() -> str:
-    return "eviiDrive server is running. Use /price or /price/summary endpoints."
+def home():
+    return app.send_static_file("index.html")
 
 
-@app.route("/price")
+@app.route("/api/price")
 def price():
     """
     Returns the full fare breakdown including all multipliers.
@@ -94,7 +94,7 @@ def price():
         return jsonify({"error": f"Unexpected server error: {str(e)}"}), 500
 
 
-@app.route("/price/summary")
+@app.route("/api/price/summary")
 def price_summary():
     """
     Returns a simplified, frontend-friendly fare summary.
@@ -154,7 +154,7 @@ def price_summary():
         return jsonify({"error": f"Unexpected server error: {str(e)}"}), 500
 
 
-@app.route("/vehicles")
+@app.route("/api/vehicles")
 def vehicles():
     """Returns available vehicle types with their base rates."""
 
@@ -185,7 +185,7 @@ def vehicles():
     return jsonify(vehicle_list), 200
 
 
-@app.route("/suggest")
+@app.route("/api/suggest")
 def suggest():
     """Autocomplete location suggestions via Nominatim."""
     query = request.args.get("q")
