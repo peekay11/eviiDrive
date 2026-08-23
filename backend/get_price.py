@@ -69,7 +69,7 @@ base_fare_map = {
 # PER-KM RATE  (Uber SA: R7.50/km for UberX / "small")
 # ===========================================================
 per_km_rate = {
-    "small":       7.50,   # UberX baseline ← was 8.50
+    "small":       7.00,   # UberX baseline ← was 8.50
     "sedan":       9.00,   # ← was 9.50
     "suv":        11.50,
     "luxury":     15.00,   # ← was 14.00
@@ -82,14 +82,14 @@ per_km_rate = {
     "limousine":  20.00,
     "truck":      22.00,
     "shuttle":    12.00,
-    "default":     7.50
+    "default":     7.00
 }
 
 # ===========================================================
 # PER-MINUTE RATE  ← NEW: Uber SA charges R0.75/min for UberX
 # ===========================================================
 per_min_rate = {
-    "small":       0.75,   # UberX baseline
+    "small":       0.70,   # UberX baseline
     "sedan":       0.90,
     "suv":         1.10,
     "luxury":      1.50,
@@ -102,7 +102,7 @@ per_min_rate = {
     "limousine":   2.20,
     "truck":       2.50,
     "shuttle":     1.10,
-    "default":     0.75
+    "default":     0.70
 }
 
 # ===========================================================
@@ -213,6 +213,10 @@ def get_price_info(distance_km, duration_min, weather_cond,
         min_fare   = minimum_fare_map.get(car, minimum_fare_map["default"])
         final_fare = max(final_fare, min_fare)
 
+        # --- Booking Fee (4% to 5%, using 4.5% here) ---
+        booking_fee = final_fare * 0.045
+        final_fare += booking_fee
+
         return {
             "base_fare":           base_fare,
             "km_charge":           round(km_charge, 2),
@@ -226,6 +230,7 @@ def get_price_info(distance_km, duration_min, weather_cond,
             "time_multiplier":     time_mult,
             "long_trip_multiplier": round(long_trip_mult, 4),
             "minimum_fare":        min_fare,
+            "booking_fee":         round(booking_fee, 2),
             "final_fare":          round(final_fare, 2)
         }
 
