@@ -22,3 +22,5 @@ Thumbs.db
 
 # --- Project Specific ---
 todo.md
+venv2/
+instance/
